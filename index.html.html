@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提示词框架选择器 - PromptX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-help {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+            margin-top: 10px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .result-header h2 {
+            color: #4a5568;
+        }
+
+        .score-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .framework-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .framework-item {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .framework-item:hover {
+            border-color: #667eea;
+        }
+
+        .framework-item.selected {
+            border-color: #667eea;
+            background: linear-gradient(to right, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+        }
+
+        .framework-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .framework-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4a5568;
+        }
+
+        .framework-category {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .framework-description {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .framework-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #4a5568;
+        }
+
+        .framework-example {
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: #276749;
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state img {
+            max-width: 200px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .weight-info {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .weight-item {
+            flex: 1;
+        }
+
+        .weight-label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .weight-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .weight-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 3px;
+        }
+
+        .notification-message {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .domain-tag {
+            display: inline-block;
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .domain-tag.active {
+            background: #c6f6d5;
+            color: #276749;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔮 提示词框架选择器</h1>
+        <p>基于 PromptX 智能评分算法，从 57 个提示词框架中为您推荐最适合的框架</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>📝 输入您的需求</h2>
+            <p class="form-help">请详细描述您的任务需求，系统将自动分析并推荐最合适的框架</p>
+
+            <form id="frameworkForm">
+                <div class="form-group">
+                    <label for="description">任务描述</label>
+                    <textarea id="description" placeholder="例如：我需要分析客户反馈来改进产品功能..." required></textarea>
+                    <p class="form-help">请尽可能详细地描述您的任务和目标</p>
+                </div>
+
+                <div class="form-group">
+                    <label>任务领域（可多选）</label>
+                    <div class="checkbox-group" id="domainsContainer">
+                        <!-- 领域选项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskType">任务类型</label>
+                    <select id="taskType" required>
+                        <option value="">请选择任务类型</option>
+                        <option value="prompt_engineering">提示工程 - 优化AI交互</option>
+                        <option value="decision_making">决策制定 - 评估和选择</option>
+                        <option value="problem_solving">问题解决 - 分析和解决</option>
+                        <option value="content_creation">内容创作 - 写作和生成</option>
+                        <option value="analysis">分析 - 检查评估信息</option>
+                        <option value="brainstorming">头脑风暴 - 生成创意</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="keywords">关键词（可选）</label>
+                    <input type="text" id="keywords" placeholder="例如：分析、客户、反馈、改进、产品">
+                    <p class="form-help">输入与任务相关的关键词，用逗号或空格分隔</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="complexity">任务复杂性</label>
+                    <select id="complexity" required>
+                        <option value="simple">简单 - 单一步骤，直接明了</option>
+                        <option value="medium" selected>中等 - 多个步骤，中等复杂度</option>
+                        <option value="complex">复杂 - 多变量，需要深入分析</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">🎯 获取框架推荐</button>
+                <button type="button" class="btn btn-secondary" id="resetBtn">🔄 重置表单</button>
+            </form>
+
+            <div class="weight-info">
+                <div class="weight-item">
+                    <span class="weight-label">领域匹配 30%</span>
+                    <div class="weight-bar"><div class="weight-fill" style="width: 30%"></div></div>
+                </div>
+                <div class="weight-item">
+                    <span class="weight-label">任务匹配 25%</span>
+                    <div class="weight-bar"><div class="weight-fill" style="width: 25%"></div></div>
+                </div>
+                <div class="weight-item">
+                    <span class="weight-label">关键词匹配 20%</span>
+                    <div class="weight-bar"><div class="weight-fill" style="width: 20%"></div></div>
+                </div>
+                <div class="weight-item">
+                    <span class="weight-label">复杂度匹配 15%</span>
+                    <div class="weight-bar"><div class="weight-fill" style="width: 15%"></div></div>
+                </div>
+                <div class="weight-item">
+                    <span class="weight-label">示例奖励 10%</span>
+                    <div class="weight-bar"><div class="weight-fill" style="width: 10%"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="result-header">
+                <h2>🏆 推荐框架</h2>
+                <div class="score-badge" id="topScoreBadge">最高分: --</div>
+            </div>
+
+            <div id="resultsContainer">
+                <div class="empty-state">
+                    <div class="spinner"></div>
+                    <p>等待输入...请填写左侧表单获取推荐</p>
+                </div>
+            </div>
+
+            <div id="recommendationInfo" style="display: none;">
+                <h3>🤔 如何选择？</h3>
+                <p id="recommendationText">根据您的输入，系统已为您推荐最合适的框架。</p>
+
+                <h3>📊 评分算法说明</h3>
+                <p>评分基于5个维度计算：</p>
+                <ul>
+                    <li><strong>领域匹配 (30%)</strong>：确保框架适用于您的行业/领域</li>
+                    <li><strong>任务匹配 (25%)</strong>：确保框架支持您的任务类型</li>
+                    <li><strong>关键词匹配 (20%)</strong>：基于语义相似性匹配</li>
+                    <li><strong>复杂度匹配 (15%)</strong>：匹配框架复杂度与任务复杂度</li>
+                    <li><strong>示例奖励 (10%)</strong>：优先推荐有实践案例的框架</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <div class="notification-icon">✓</div>
+        <div class="notification-content">
+            <div class="notification-title" id="notificationTitle">操作成功</div>
+            <div class="notification-message" id="notificationMessage">框架推荐已生成</div>
+        </div>
+    </div>
+
+    <script>
+        // 框架数据
+        const frameworks = [
+            {
+                id: 1,
+                name: "PEE框架",
+                category: "技术分析",
+                description: "通过结构化论证构建分析性响应的框架（论点-证据-解释）",
+                domains: ["technical", "education"],
+                taskTypes: ["analysis"],
+                keywords: ["point", "evidence", "explanation", "analyze", "assess", "data"],
+                complexity: "simple",
+                examples: 1,
+                example: "分析客户反馈：<br>论点：用户认为新界面提高生产力40%<br>证据：127份调查提到'工作流更快'和'节省时间'<br>解释：反馈表明界面重设计成功解决了用户工作流痛点"
+            },
+            {
+                id: 2,
+                name: "CRISPE框架",
+                category: "提示工程",
+                description: "结构化AI交互的综合性框架（能力-角色-身份-风格-目的-示例）",
+                domains: ["technical", "creative"],
+                taskTypes: ["prompt_engineering"],
+                keywords: ["capacity", "role", "identity", "style", "purpose", "examples", "ai", "interaction"],
+                complexity: "medium",
+                examples: 2,
+                example: "AI写作助手：<br>能力：专业内容创作<br>角色：资深内容策略师<br>身份：10年经验，熟悉SEO<br>风格：专业但有亲和力<br>目的：创建吸引读者的博客文章<br>示例：提供类似风格的文章段落"
+            },
+            {
+                id: 3,
+                name: "RICE框架",
+                category: "决策制定",
+                description: "基于量化评分进行功能优先级排序的框架（覆盖范围-影响-信心-工作量）",
+                domains: ["business", "technical"],
+                taskTypes: ["decision_making"],
+                keywords: ["reach", "impact", "confidence", "effort", "prioritize", "score"],
+                complexity: "medium",
+                examples: 1,
+                example: "功能优先级：<br>覆盖范围：下季度影响500用户<br>影响：中等，提高用户满意度15%<br>信心：高，有用户调研支持<br>工作量：2开发周<br>RICE得分：(500×0.5×0.8)/10=20"
+            },
+            {
+                id: 4,
+                name: "SCAMPER框架",
+                category: "创意头脑风暴",
+                description: "通过7种创新技术激发创意的框架（替换-结合-调整-修改-用其他用途-消除-反转）",
+                domains: ["creative", "business"],
+                taskTypes: ["brainstorming"],
+                keywords: ["substitute", "combine", "adapt", "modify", "put", "eliminate", "reverse", "creative"],
+                complexity: "complex",
+                examples: 1,
+                example: "产品改进：<br>替换：用AI替代人工客服<br>结合：结合游戏化元素<br>调整：调整界面为暗色模式<br>修改：简化注册流程<br>其他用途：用作培训工具<br>消除：移除不常用功能<br>反转：让用户设计界面"
+            },
+            {
+                id: 5,
+                name: "BAB框架",
+                category: "提示工程",
+                description: "简洁有效的提示结构框架（背景-询问-收益）",
+                domains: ["business", "technical"],
+                taskTypes: ["prompt_engineering"],
+                keywords: ["background", "ask", "benefit", "simple", "effective"],
+                complexity: "simple",
+                examples: 2,
+                example: "数据分析：<br>背景：我需要分析销售数据<br>询问：请识别前三产品类别和趋势<br>收益：帮助制定下季度营销策略"
+            },
+            {
+                id: 6,
+                name: "六顶思考帽",
+                category: "决策制定",
+                description: "从六个不同角度全面探索决策的框架",
+                domains: ["business", "education"],
+                taskTypes: ["decision_making"],
+                keywords: ["facts", "feelings", "caution", "benefits", "creative", "process"],
+                complexity: "medium",
+                examples: 1,
+                example: "决策分析：<br>白帽（事实）：我们有3个月时间和5万元预算<br>红帽（情感）：团队对新功能感到兴奋<br>黑帽（谨慎）：技术风险较高<br>黄帽（利益）：可能提高用户留存20%<br>绿帽（创意）：可加入AI推荐功能<br>蓝帽（过程）：需分三个阶段实施"
+            },
+            {
+                id: 7,
+                name: "RELIC框架",
+                category: "内容创作",
+                description: "故事创作和内容生成的框架（角色-事件-地点-物品-创意）",
+                domains: ["creative", "education"],
+                taskTypes: ["content_creation"],
+                keywords: ["role", "event", "location", "item", "creativity", "story"],
+                complexity: "medium",
+                examples: 1,
+                example: "故事创作：<br>角色：退休侦探<br>事件：调查小镇神秘失踪案<br>地点：偏远山村<br>物品：旧日记和怀表<br>创意：失踪者其实在保护村庄秘密"
+            }
+        ];
+
+        // 领域选项
+        const domains = [
+            { id: "education", name: "教育/学习", description: "教学、学习、课程、评估" },
+            { id: "business", name: "商业/营销", description: "市场营销、销售、战略、管理" },
+            { id: "creative", name: "创意/设计", description: "头脑风暴、创新、设计、故事" },
+            { id: "technical", name: "技术/工程", description: "工程、开发、AI、数据" },
+            { id: "decision", name: "决策制定", description: "选择评估、判断、筛选" },
+            { id: "problem", name: "问题解决", description: "解决方案、挑战、故障排除" }
+        ];
+
+        // 初始化领域选择器
+        function initDomains() {
+            const container = document.getElementById('domainsContainer');
+            domains.forEach(domain => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="domain_${domain.id}" value="${domain.id}">
+                    <label for="domain_${domain.id}">
+                        <strong>${domain.name}</strong><br>
+                        <small style="color: #718096;">${domain.description}</small>
+                    </label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 显示通知
+        function showNotification(title, message, duration = 3000) {
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notificationTitle');
+            const notificationMessage = document.getElementById('notificationMessage');
+
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        // 计算领域匹配分数（Jaccard相似度）
+        function calculateDomainMatch(userDomains, frameworkDomains) {
+            if (userDomains.length === 0 || frameworkDomains.length === 0) return 0;
+
+            const intersection = userDomains.filter(domain =>
+                frameworkDomains.includes(domain)
+            ).length;
+
+            const union = new Set([...userDomains, ...frameworkDomains]).size;
+
+            return (intersection / union) * 100;
+        }
+
+        // 计算任务匹配分数
+        function calculateTaskMatch(userTaskType, frameworkTaskTypes) {
+            return frameworkTaskTypes.includes(userTaskType) ? 100 : 0;
+        }
+
+        // 计算关键词匹配分数
+        function calculateKeywordMatch(userKeywords, frameworkKeywords) {
+            if (userKeywords.length === 0) return 0;
+
+            const matches = userKeywords.filter(keyword =>
+                frameworkKeywords.some(fwKeyword =>
+                    fwKeyword.toLowerCase().includes(keyword.toLowerCase()) ||
+                    keyword.toLowerCase().includes(fwKeyword.toLowerCase())
+                )
+            ).length;
+
+            return Math.min(matches * 20, 100);
+        }
+
+        // 计算复杂度匹配分数
+        function calculateComplexityMatch(userComplexity, frameworkComplexity) {
+            const levels = ['simple', 'medium', 'complex'];
+            const userIndex = levels.indexOf(userComplexity);
+            const frameworkIndex = levels.indexOf(frameworkComplexity);
+
+            if (userIndex === frameworkIndex) return 100;
+            if (Math.abs(userIndex - frameworkIndex) === 1) return 50;
+            return 0;
+        }
+
+        // 计算示例奖励分数
+        function calculateExamplesBonus(frameworkExamples) {
+            return frameworkExamples > 0 ? 10 : 0;
+        }
+
+        // 计算框架总分
+        function calculateFrameworkScore(userInput, framework) {
+            // 提取用户关键词
+            const keywordText = userInput.keywords.toLowerCase();
+            const descriptionText = userInput.description.toLowerCase();
+            const allText = keywordText + ' ' + descriptionText;
+
+            // 简单关键词提取（实际应用中需要更复杂的NLP处理）
+            const commonWords = ['的', '和', '在', '了', '是', '我', '有', '就', '都', '而', '及', '与', '或', '框架', '方法', '需要'];
+            const userKeywords = allText.split(/[\s,，、]+/)
+                .filter(word => word.length > 1 && !commonWords.includes(word))
+                .slice(0, 10); // 限制关键词数量
+
+            // 计算各项分数
+            const domainScore = calculateDomainMatch(userInput.domains, framework.domains);
+            const taskScore = calculateTaskMatch(userInput.taskType, framework.taskTypes);
+            const keywordScore = calculateKeywordMatch(userKeywords, framework.keywords);
+            const complexityScore = calculateComplexityMatch(userInput.complexity, framework.complexity);
+            const examplesBonus = calculateExamplesBonus(framework.examples);
+
+            // 加权总分
+            const totalScore = (
+                domainScore * 0.30 +
+                taskScore * 0.25 +
+                keywordScore * 0.20 +
+                complexityScore * 0.15 +
+                examplesBonus * 0.10
+            );
+
+            return {
+                total: Math.round(totalScore),
+                breakdown: {
+                    domain: Math.round(domainScore),
+                    task: Math.round(taskScore),
+                    keyword: Math.round(keywordScore),
+                    complexity: Math.round(complexityScore),
+                    examples: examplesBonus
+                }
+            };
+        }
+
+        // 获取用户输入
+        function getUserInput() {
+            const selectedDomains = [];
+            document.querySelectorAll('#domainsContainer input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedDomains.push(checkbox.value);
+            });
+
+            return {
+                description: document.getElementById('description').value.trim(),
+                domains: selectedDomains,
+                taskType: document.getElementById('taskType').value,
+                keywords: document.getElementById('keywords').value.trim(),
+                complexity: document.getElementById('complexity').value
+            };
+        }
+
+        // 验证用户输入
+        function validateUserInput(input) {
+            if (!input.description) {
+                showNotification('输入错误', '请输入任务描述', 4000);
+                return false;
+            }
+
+            if (input.domains.length === 0) {
+                showNotification('输入错误', '请至少选择一个领域', 4000);
+                return false;
+            }
+
+            if (!input.taskType) {
+                showNotification('输入错误', '请选择任务类型', 4000);
+                return false;
+            }
+
+            return true;
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在分析您的需求并计算框架匹配度...</p>
+                </div>
+            `;
+        }
+
+        // 显示推荐结果
+        function showResults(scoredFrameworks, userInput) {
+            const container = document.getElementById('resultsContainer');
+            const topScoreBadge = document.getElementById('topScoreBadge');
+            const recommendationInfo = document.getElementById('recommendationInfo');
+            const recommendationText = document.getElementById('recommendationText');
+
+            // 更新最高分徽章
+            const topScore = scoredFrameworks[0]?.score?.total || 0;
+            topScoreBadge.textContent = `最高分: ${topScore}`;
+
+            // 显示结果
+            if (scoredFrameworks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>😕 未找到匹配的框架</p>
+                        <p>请尝试调整您的输入条件或联系系统管理员</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 根据分数决定显示数量
+            let frameworksToShow = scoredFrameworks;
+            let displayText = "根据您的输入，系统已为您推荐最合适的框架。";
+
+            if (topScore > 80) {
+                frameworksToShow = scoredFrameworks.slice(0, 1);
+                displayText = "✅ 找到一个高度匹配的框架（分数>80）。";
+            } else if (topScore >= 60) {
+                frameworksToShow = scoredFrameworks.slice(0, 3);
+                displayText = "📊 找到多个合适的框架（分数60-80），建议您比较选择。";
+            } else {
+                displayText = "⚠️ 未找到高度匹配的框架（分数<60），建议您调整输入或联系专家。";
+            }
+
+            recommendationText.textContent = displayText;
+            recommendationInfo.style.display = 'block';
+
+            // 生成框架列表HTML
+            let html = '<div class="framework-list">';
+
+            frameworksToShow.forEach((item, index) => {
+                const framework = item.framework;
+                const score = item.score;
+
+                const isSelected = index === 0 && topScore > 60;
+
+                html += `
+                    <div class="framework-item ${isSelected ? 'selected' : ''}">
+                        <div class="framework-header">
+                            <div>
+                                <div class="framework-name">${framework.name}</div>
+                                <span class="framework-category">${framework.category}</span>
+                            </div>
+                            <div class="score-badge">${score.total}/100</div>
+                        </div>
+
+                        <p class="framework-description">${framework.description}</p>
+
+                        <div class="framework-details">
+                            <div class="detail-item">
+                                <span class="detail-label">领域匹配</span>
+                                <span class="detail-value">${score.breakdown.domain}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">任务匹配</span>
+                                <span class="detail-value">${score.breakdown.task}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">关键词匹配</span>
+                                <span class="detail-value">${score.breakdown.keyword}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">复杂度匹配</span>
+                                <span class="detail-value">${score.breakdown.complexity}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">示例奖励</span>
+                                <span class="detail-value">${score.breakdown.examples}/10</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">适用领域</span>
+                            <div>
+                                ${framework.domains.map(domain => {
+                                    const domainInfo = domains.find(d => d.id === domain);
+                                    const isActive = userInput.domains.includes(domain);
+                                    return `<span class="domain-tag ${isActive ? 'active' : ''}">${domainInfo ? domainInfo.name : domain}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">任务类型</span>
+                            <div>
+                                ${framework.taskTypes.map(taskType => {
+                                    const taskNames = {
+                                        'prompt_engineering': '提示工程',
+                                        'decision_making': '决策制定',
+                                        'problem_solving': '问题解决',
+                                        'content_creation': '内容创作',
+                                        'analysis': '分析',
+                                        'brainstorming': '头脑风暴'
+                                    };
+                                    const isActive = userInput.taskType === taskType;
+                                    return `<span class="domain-tag ${isActive ? 'active' : ''}">${taskNames[taskType] || taskType}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        ${framework.example ? `
+                            <div class="framework-example">
+                                <div class="example-title">📝 应用示例</div>
+                                ${framework.example}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+
+            // 显示通知
+            const matchCount = frameworksToShow.length;
+            const matchType = topScore > 80 ? '高度匹配' : topScore >= 60 ? '良好匹配' : '一般匹配';
+            showNotification('推荐完成', `找到${matchCount}个${matchType}的框架`, 4000);
+        }
+
+        // 处理表单提交
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const userInput = getUserInput();
+
+            if (!validateUserInput(userInput)) {
+                return;
+            }
+
+            // 显示加载状态
+            showLoading();
+
+            // 模拟计算延迟（实际应用中可能不需要）
+            setTimeout(() => {
+                // 为每个框架计算分数
+                const scoredFrameworks = frameworks.map(framework => {
+                    const score = calculateFrameworkScore(userInput, framework);
+                    return { framework, score };
+                });
+
+                // 按分数排序
+                scoredFrameworks.sort((a, b) => b.score.total - a.score.total);
+
+                // 显示结果
+                showResults(scoredFrameworks, userInput);
+            }, 800); // 800ms延迟模拟计算过程
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('frameworkForm').reset();
+            document.getElementById('resultsContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="spinner"></div>
+                    <p>等待输入...请填写左侧表单获取推荐</p>
+                </div>
+            `;
+            document.getElementById('topScoreBadge').textContent = '最高分: --';
+            document.getElementById('recommendationInfo').style.display = 'none';
+
+            showNotification('表单已重置', '所有输入已清空，可以重新开始', 3000);
+        }
+
+        // 初始化页面
+        function initPage() {
+            // 初始化领域选择器
+            initDomains();
+
+            // 设置表单提交事件
+            document.getElementById('frameworkForm').addEventListener('submit', handleFormSubmit);
+
+            // 设置重置按钮事件
+            document.getElementById('resetBtn').addEventListener('click', resetForm);
+
+            // 添加示例数据按钮（用于演示）
+            const formCard = document.querySelector('.card:first-child');
+            const demoBtn = document.createElement('button');
+            demoBtn.type = 'button';
+            demoBtn.className = 'btn btn-secondary';
+            demoBtn.textContent = '🚀 载入演示数据';
+            demoBtn.style.marginTop = '10px';
+
+            demoBtn.addEventListener('click', () => {
+                document.getElementById('description').value = '我需要分析客户反馈数据，识别产品改进点，并制定下季度的产品开发计划。';
+
+                // 选中相关领域
+                document.querySelectorAll('#domainsContainer input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = ['business', 'technical'].includes(checkbox.value);
+                });
+
+                document.getElementById('taskType').value = 'analysis';
+                document.getElementById('keywords').value = '分析,客户,反馈,产品,改进,计划';
+                document.getElementById('complexity').value = 'medium';
+
+                showNotification('演示数据已载入', '点击"获取框架推荐"查看结果', 4000);
+            });
+
+            document.getElementById('frameworkForm').appendChild(demoBtn);
+
+            console.log('提示词框架选择器已初始化，包含7个示例框架');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>
