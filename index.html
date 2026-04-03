@@ -3,1006 +3,920 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>提示词框架选择器 - PromptX</title>
+    <title>提示词框架生成器 - PromptX</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
+            padding: 24px;
+            color: #333;
         }
 
         .header {
-            grid-column: 1 / -1;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 28px;
         }
+        .header h1 { color: white; font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+        .header p { color: rgba(255,255,255,0.88); font-size: 1rem; margin-top: 6px; }
 
-        .header h1 {
-            color: white;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-            max-width: 800px;
+        .container {
+            max-width: 1380px;
             margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #4a5568;
-        }
-
-        .form-help {
-            font-size: 0.9rem;
-            color: #718096;
-            margin-top: 5px;
-        }
-
-        input[type="text"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .checkbox-group {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 8px;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.12);
         }
 
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        /* ── LEFT PANEL ── */
+        .left-panel h2 { font-size: 1.15rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+        .left-panel .subtitle { font-size: 0.85rem; color: #718096; margin-bottom: 20px; }
 
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
+        .input-label { font-size: 0.8rem; font-weight: 600; color: #4a5568; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 6px; display: block; }
 
-        .btn {
+        textarea#userDesc {
+            width: 100%;
+            min-height: 130px;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.97rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color .2s;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+        textarea#userDesc:focus { outline: none; border-color: #667eea; }
+        textarea#userDesc::placeholder { color: #a0aec0; }
+
+        .example-section { margin-top: 14px; }
+        .example-section-header { margin-bottom: 10px; }
+        .example-hint { font-size: 0.78rem; color: #a0aec0; font-weight: 500; }
+
+        .role-groups { display: flex; flex-direction: column; gap: 8px; }
+        .role-group { display: flex; align-items: flex-start; gap: 8px; }
+        .role-label {
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-top: 2px;
+            letter-spacing: .03em;
+            width: 36px;
+            text-align: center;
+        }
+        .role-product { background: #bee3f8; color: #2b6cb0; }
+        .role-dev     { background: #c6f6d5; color: #276749; }
+        .role-ops     { background: #feebc8; color: #c05621; }
+        .role-merch   { background: #e9d8fd; color: #553c9a; }
+        .role-qa      { background: #fed7d7; color: #c53030; }
+        .role-report  { background: #e2e8f0; color: #2d3748; }
+
+        .role-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        .chip-example {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            cursor: pointer;
+            transition: background .15s, color .15s, border-color .15s;
+            white-space: nowrap;
+        }
+        .chip-example:hover { background: #667eea; color: white; border-color: #667eea; }
+
+        .btn-analyze {
+            width: 100%;
+            margin-top: 18px;
+            padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 16px 32px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
-            margin-top: 10px;
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .result-header h2 {
-            color: #4a5568;
-        }
-
-        .score-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .framework-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .framework-item {
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            transition: border-color 0.2s;
-        }
-
-        .framework-item:hover {
-            border-color: #667eea;
-        }
-
-        .framework-item.selected {
-            border-color: #667eea;
-            background: linear-gradient(to right, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-        }
-
-        .framework-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .framework-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #4a5568;
-        }
-
-        .framework-category {
-            display: inline-block;
-            background: #e2e8f0;
-            color: #4a5568;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-
-        .framework-description {
-            color: #718096;
-            margin-bottom: 15px;
-        }
-
-        .framework-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f7fafc;
-            border-radius: 8px;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .detail-label {
-            font-size: 0.9rem;
-            color: #718096;
-            font-weight: 600;
-        }
-
-        .detail-value {
+            border-radius: 10px;
             font-size: 1rem;
-            color: #4a5568;
-        }
-
-        .framework-example {
-            background: #f0fff4;
-            border: 1px solid #c6f6d5;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .example-title {
-            font-weight: 600;
-            color: #276749;
-            margin-bottom: 8px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #718096;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #718096;
-        }
-
-        .empty-state img {
-            max-width: 200px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .weight-info {
-            display: flex;
-            gap: 20px;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .weight-item {
-            flex: 1;
-        }
-
-        .weight-label {
-            display: block;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 5px;
-        }
-
-        .weight-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-
-        .weight-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            padding: 15px 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification-icon {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
+            gap: 8px;
         }
+        .btn-analyze:hover { opacity: .9; transform: translateY(-1px); }
+        .btn-analyze:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-        .notification-content {
-            flex: 1;
+        /* detected tags */
+        .detected-section { margin-top: 22px; border-top: 1px solid #f0f0f0; padding-top: 18px; }
+        .detected-section h3 { font-size: 0.8rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+        .detected-row { display: flex; flex-direction: column; gap: 10px; }
+        .detected-item { display: flex; flex-direction: column; gap: 4px; }
+        .det-label { font-size: 0.75rem; color: #a0aec0; font-weight: 600; }
+        .det-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+        .det-tag {
+            background: linear-gradient(135deg, rgba(102,126,234,.12), rgba(118,75,162,.12));
+            color: #553c9a;
+            border: 1px solid rgba(118,75,162,.2);
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
         }
+        .det-tag.empty { color: #a0aec0; background: #f7fafc; border-color: #e2e8f0; }
 
-        .notification-title {
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 3px;
+        /* ── RIGHT PANEL ── */
+        .right-panel .panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #f0f0f0;
         }
+        .right-panel .panel-header h2 { font-size: 1.15rem; font-weight: 700; color: #2d3748; }
 
-        .notification-message {
-            color: #718096;
-            font-size: 0.9rem;
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 60px 20px; color: #a0aec0;
+            text-align: center;
         }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 14px; opacity: .5; }
+        .empty-state p { font-size: 0.95rem; line-height: 1.6; }
 
-        .domain-tag {
+        /* skeleton */
+        .skeleton-wrap { display: flex; flex-direction: column; gap: 14px; }
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* result */
+        .result-wrap { display: flex; flex-direction: column; gap: 20px; }
+
+        /* top recommendation */
+        .top-rec {
+            border: 2px solid #667eea;
+            border-radius: 14px;
+            padding: 22px;
+            background: linear-gradient(135deg, rgba(102,126,234,.04), rgba(118,75,162,.04));
+        }
+        .top-rec-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .rec-title-block { display: flex; flex-direction: column; gap: 4px; }
+        .rec-rank { font-size: 0.72rem; font-weight: 700; color: #667eea; text-transform: uppercase; letter-spacing: .08em; }
+        .rec-name { font-size: 1.4rem; font-weight: 800; color: #2d3748; }
+        .rec-category {
             display: inline-block;
-            background: #edf2f7;
-            color: #4a5568;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            background: #e9d8fd;
+            color: #553c9a;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+        .score-circle {
+            flex-shrink: 0;
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white;
+        }
+        .score-circle .score-num { font-size: 1.3rem; font-weight: 800; line-height: 1; }
+        .score-circle .score-denom { font-size: 0.65rem; opacity: .8; }
+
+        .rec-desc { font-size: 0.9rem; color: #4a5568; line-height: 1.7; margin-bottom: 16px; }
+
+        /* reasoning */
+        .reasoning-box {
+            background: #fffbeb;
+            border: 1px solid #fbd38d;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+        .reasoning-box .box-title { font-size: 0.78rem; font-weight: 700; color: #b7791f; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .reasoning-box p { font-size: 0.88rem; color: #744210; line-height: 1.7; }
+
+        /* score breakdown */
+        .score-breakdown { margin-bottom: 16px; }
+        .score-breakdown .box-title { font-size: 0.78rem; font-weight: 700; color: #4a5568; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .score-rows { display: flex; flex-direction: column; gap: 7px; }
+        .score-row { display: flex; align-items: center; gap: 10px; }
+        .score-row-label { font-size: 0.78rem; color: #718096; width: 90px; flex-shrink: 0; }
+        .score-bar-wrap { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .score-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #667eea, #764ba2); transition: width .6s ease; }
+        .score-row-val { font-size: 0.78rem; font-weight: 700; color: #4a5568; width: 38px; text-align: right; flex-shrink: 0; }
+
+        /* sample prompt */
+        .prompt-box { background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 10px; overflow: hidden; }
+        .prompt-box-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px; background: #c6f6d5; border-bottom: 1px solid #9ae6b4;
+        }
+        .prompt-box-header .box-title { font-size: 0.78rem; font-weight: 700; color: #276749; display: flex; align-items: center; gap: 5px; margin: 0; }
+        .btn-copy {
+            background: #38a169; color: white; border: none; padding: 5px 12px;
+            border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            transition: background .15s;
+        }
+        .btn-copy:hover { background: #276749; }
+        .btn-copy.copied { background: #276749; }
+        .prompt-content {
+            padding: 14px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.83rem;
+            color: #2d3748;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.7;
+            max-height: 280px;
+            overflow-y: auto;
         }
 
-        .domain-tag.active {
-            background: #c6f6d5;
-            color: #276749;
+        /* alternatives */
+        .alts-section { display: flex; flex-direction: column; gap: 10px; }
+        .alts-label { font-size: 0.8rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: .05em; }
+        .alt-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: border-color .15s;
+            cursor: pointer;
         }
+        .alt-item:hover { border-color: #667eea; }
+        .alt-score-badge {
+            flex-shrink: 0;
+            background: #e2e8f0;
+            color: #4a5568;
+            font-size: 0.8rem;
+            font-weight: 700;
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .alt-info { flex: 1; }
+        .alt-name { font-size: 0.95rem; font-weight: 700; color: #2d3748; }
+        .alt-reason { font-size: 0.8rem; color: #718096; margin-top: 2px; line-height: 1.5; }
+        .alt-cat { font-size: 0.72rem; color: #9b59b6; font-weight: 600; background: #e9d8fd; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 4px; }
+
+        /* notification */
+        .notification {
+            position: fixed; top: 20px; right: 20px;
+            background: white; border-radius: 10px; padding: 12px 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.15);
+            transform: translateX(350px); transition: transform .3s;
+            z-index: 100; font-size: 0.88rem; color: #2d3748; font-weight: 500;
+        }
+        .notification.show { transform: translateX(0); }
+
+        /* spinner */
+        .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🔮 提示词框架选择器</h1>
-        <p>基于 PromptX 智能评分算法，从 57 个提示词框架中为您推荐最适合的框架</p>
-    </div>
 
-    <div class="container">
-        <div class="card">
-            <h2>📝 输入您的需求</h2>
-            <p class="form-help">请详细描述您的任务需求，系统将自动分析并推荐最合适的框架</p>
+<div class="header">
+    <h1>🧠 PromptX 框架推荐器</h1>
+    <p>滔搏 · 内部提示词框架工具 &nbsp;|&nbsp; 描述您的工作任务，AI 自动匹配最合适的框架并生成示范 Prompt</p>
+</div>
 
-            <form id="frameworkForm">
-                <div class="form-group">
-                    <label for="description">任务描述</label>
-                    <textarea id="description" placeholder="例如：我需要分析客户反馈来改进产品功能..." required></textarea>
-                    <p class="form-help">请尽可能详细地描述您的任务和目标</p>
-                </div>
+<div class="container">
+    <!-- LEFT PANEL -->
+    <div class="card left-panel">
+        <h2>💬 描述您的需求</h2>
+        <p class="subtitle">直接用自己的话描述任务，AI 自动分析并推荐最合适的框架</p>
 
-                <div class="form-group">
-                    <label>任务领域（可多选）</label>
-                    <div class="checkbox-group" id="domainsContainer">
-                        <!-- 领域选项将通过JavaScript动态生成 -->
+        <label class="input-label" for="userDesc">描述您想做什么</label>
+        <textarea id="userDesc" placeholder="用自然语言描述您的任务，例如：&#10;&#10;我想分析本季度各门店的库存周转情况，找出积压商品并制定清货策略…&#10;&#10;或者：帮我设计一个新功能的测试方案，覆盖主流程和边界场景…"></textarea>
+
+        <div class="example-section">
+            <div class="example-section-header">
+                <span class="example-hint">💡 快捷示例（按岗位选择，也可直接在上方输入）</span>
+            </div>
+            <div class="role-groups">
+                <div class="role-group">
+                    <span class="role-label role-product">产品</span>
+                    <div class="role-chips">
+                        <button class="chip-example" onclick="fillExample(this)" data-key="product1">分析用户反馈优化功能</button>
+                        <button class="chip-example" onclick="fillExample(this)" data-key="product2">撰写新功能需求文档</button>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="taskType">任务类型</label>
-                    <select id="taskType" required>
-                        <option value="">请选择任务类型</option>
-                        <option value="prompt_engineering">提示工程 - 优化AI交互</option>
-                        <option value="decision_making">决策制定 - 评估和选择</option>
-                        <option value="problem_solving">问题解决 - 分析和解决</option>
-                        <option value="content_creation">内容创作 - 写作和生成</option>
-                        <option value="analysis">分析 - 检查评估信息</option>
-                        <option value="brainstorming">头脑风暴 - 生成创意</option>
-                    </select>
+                <div class="role-group">
+                    <span class="role-label role-dev">开发</span>
+                    <div class="role-chips">
+                        <button class="chip-example" onclick="fillExample(this)" data-key="dev1">制定技术方案评审</button>
+                        <button class="chip-example" onclick="fillExample(this)" data-key="dev2">排查线上接口异常</button>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="keywords">关键词（可选）</label>
-                    <input type="text" id="keywords" placeholder="例如：分析、客户、反馈、改进、产品">
-                    <p class="form-help">输入与任务相关的关键词，用逗号或空格分隔</p>
+                <div class="role-group">
+                    <span class="role-label role-qa">测试</span>
+                    <div class="role-chips">
+                        <button class="chip-example" onclick="fillExample(this)" data-key="qa1">编写功能测试用例</button>
+                        <button class="chip-example" onclick="fillExample(this)" data-key="qa2">设计回归测试方案</button>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="complexity">任务复杂性</label>
-                    <select id="complexity" required>
-                        <option value="simple">简单 - 单一步骤，直接明了</option>
-                        <option value="medium" selected>中等 - 多个步骤，中等复杂度</option>
-                        <option value="complex">复杂 - 多变量，需要深入分析</option>
-                    </select>
+                <div class="role-group">
+                    <span class="role-label role-ops">运营</span>
+                    <div class="role-chips">
+                        <button class="chip-example" onclick="fillExample(this)" data-key="ops1">策划大促活动方案</button>
+                        <button class="chip-example" onclick="fillExample(this)" data-key="ops2">分析门店销售数据</button>
+                    </div>
                 </div>
-
-                <button type="submit" class="btn">🎯 获取框架推荐</button>
-                <button type="button" class="btn btn-secondary" id="resetBtn">🔄 重置表单</button>
-            </form>
-
-            <div class="weight-info">
-                <div class="weight-item">
-                    <span class="weight-label">领域匹配 30%</span>
-                    <div class="weight-bar"><div class="weight-fill" style="width: 30%"></div></div>
+                <div class="role-group">
+                    <span class="role-label role-merch">货品</span>
+                    <div class="role-chips">
+                        <button class="chip-example" onclick="fillExample(this)" data-key="merch1">制定补货与库存策略</button>
+                        <button class="chip-example" onclick="fillExample(this)" data-key="merch2">分析滞销品清货方案</button>
+                    </div>
                 </div>
-                <div class="weight-item">
-                    <span class="weight-label">任务匹配 25%</span>
-                    <div class="weight-bar"><div class="weight-fill" style="width: 25%"></div></div>
-                </div>
-                <div class="weight-item">
-                    <span class="weight-label">关键词匹配 20%</span>
-                    <div class="weight-bar"><div class="weight-fill" style="width: 20%"></div></div>
-                </div>
-                <div class="weight-item">
-                    <span class="weight-label">复杂度匹配 15%</span>
-                    <div class="weight-bar"><div class="weight-fill" style="width: 15%"></div></div>
-                </div>
-                <div class="weight-item">
-                    <span class="weight-label">示例奖励 10%</span>
-                    <div class="weight-bar"><div class="weight-fill" style="width: 10%"></div></div>
+                <div class="role-group">
+                    <span class="role-label role-report">报告</span>
+                    <div class="role-chips">
+                        <button class="chip-example" onclick="fillExample(this)" data-key="report1">撰写项目复盘总结</button>
+                        <button class="chip-example" onclick="fillExample(this)" data-key="report2">生成周期业务汇报</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="result-header">
-                <h2>🏆 推荐框架</h2>
-                <div class="score-badge" id="topScoreBadge">最高分: --</div>
-            </div>
+        <button class="btn-analyze" id="analyzeBtn" onclick="analyzeWithAI()">
+            <span id="btnIcon">✨</span>
+            <span id="btnText">AI 智能分析并推荐框架</span>
+        </button>
 
-            <div id="resultsContainer">
-                <div class="empty-state">
-                    <div class="spinner"></div>
-                    <p>等待输入...请填写左侧表单获取推荐</p>
+        <!-- detected tags section -->
+        <div class="detected-section" id="detectedSection" style="display:none;">
+            <h3>🔍 AI 识别结果</h3>
+            <div class="detected-row">
+                <div class="detected-item">
+                    <span class="det-label">任务领域</span>
+                    <div class="det-tags" id="detDomains"></div>
                 </div>
-            </div>
-
-            <div id="recommendationInfo" style="display: none;">
-                <h3>🤔 如何选择？</h3>
-                <p id="recommendationText">根据您的输入，系统已为您推荐最合适的框架。</p>
-
-                <h3>📊 评分算法说明</h3>
-                <p>评分基于5个维度计算：</p>
-                <ul>
-                    <li><strong>领域匹配 (30%)</strong>：确保框架适用于您的行业/领域</li>
-                    <li><strong>任务匹配 (25%)</strong>：确保框架支持您的任务类型</li>
-                    <li><strong>关键词匹配 (20%)</strong>：基于语义相似性匹配</li>
-                    <li><strong>复杂度匹配 (15%)</strong>：匹配框架复杂度与任务复杂度</li>
-                    <li><strong>示例奖励 (10%)</strong>：优先推荐有实践案例的框架</li>
-                </ul>
+                <div class="detected-item">
+                    <span class="det-label">任务类型</span>
+                    <div class="det-tags" id="detTaskType"></div>
+                </div>
+                <div class="detected-item">
+                    <span class="det-label">复杂度</span>
+                    <div class="det-tags" id="detComplexity"></div>
+                </div>
+                <div class="detected-item">
+                    <span class="det-label">核心关键词</span>
+                    <div class="det-tags" id="detKeywords"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="notification" id="notification">
-        <div class="notification-icon">✓</div>
-        <div class="notification-content">
-            <div class="notification-title" id="notificationTitle">操作成功</div>
-            <div class="notification-message" id="notificationMessage">框架推荐已生成</div>
+    <!-- RIGHT PANEL -->
+    <div class="card right-panel">
+        <div class="panel-header">
+            <h2>🏆 推荐框架</h2>
+            <div id="topScoreBadge" style="font-size:0.82rem;color:#a0aec0;">等待分析...</div>
+        </div>
+
+        <div id="resultsArea">
+            <div class="empty-state">
+                <div class="icon">🎯</div>
+                <p>在左侧输入您的需求<br>AI 将自动分析并推荐最合适的框架<br><br><span style="font-size:0.82rem;color:#cbd5e0;">无需手动勾选任何分类</span></p>
+            </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // 框架数据
-        const frameworks = [
-            {
-                id: 1,
-                name: "PEE框架",
-                category: "技术分析",
-                description: "通过结构化论证构建分析性响应的框架（论点-证据-解释）",
-                domains: ["technical", "education"],
-                taskTypes: ["analysis"],
-                keywords: ["point", "evidence", "explanation", "analyze", "assess", "data"],
-                complexity: "simple",
-                examples: 1,
-                example: "分析客户反馈：<br>论点：用户认为新界面提高生产力40%<br>证据：127份调查提到'工作流更快'和'节省时间'<br>解释：反馈表明界面重设计成功解决了用户工作流痛点"
-            },
-            {
-                id: 2,
-                name: "CRISPE框架",
-                category: "提示工程",
-                description: "结构化AI交互的综合性框架（能力-角色-身份-风格-目的-示例）",
-                domains: ["technical", "creative"],
-                taskTypes: ["prompt_engineering"],
-                keywords: ["capacity", "role", "identity", "style", "purpose", "examples", "ai", "interaction"],
-                complexity: "medium",
-                examples: 2,
-                example: "AI写作助手：<br>能力：专业内容创作<br>角色：资深内容策略师<br>身份：10年经验，熟悉SEO<br>风格：专业但有亲和力<br>目的：创建吸引读者的博客文章<br>示例：提供类似风格的文章段落"
-            },
-            {
-                id: 3,
-                name: "RICE框架",
-                category: "决策制定",
-                description: "基于量化评分进行功能优先级排序的框架（覆盖范围-影响-信心-工作量）",
-                domains: ["business", "technical"],
-                taskTypes: ["decision_making"],
-                keywords: ["reach", "impact", "confidence", "effort", "prioritize", "score"],
-                complexity: "medium",
-                examples: 1,
-                example: "功能优先级：<br>覆盖范围：下季度影响500用户<br>影响：中等，提高用户满意度15%<br>信心：高，有用户调研支持<br>工作量：2开发周<br>RICE得分：(500×0.5×0.8)/10=20"
-            },
-            {
-                id: 4,
-                name: "SCAMPER框架",
-                category: "创意头脑风暴",
-                description: "通过7种创新技术激发创意的框架（替换-结合-调整-修改-用其他用途-消除-反转）",
-                domains: ["creative", "business"],
-                taskTypes: ["brainstorming"],
-                keywords: ["substitute", "combine", "adapt", "modify", "put", "eliminate", "reverse", "creative"],
-                complexity: "complex",
-                examples: 1,
-                example: "产品改进：<br>替换：用AI替代人工客服<br>结合：结合游戏化元素<br>调整：调整界面为暗色模式<br>修改：简化注册流程<br>其他用途：用作培训工具<br>消除：移除不常用功能<br>反转：让用户设计界面"
-            },
-            {
-                id: 5,
-                name: "BAB框架",
-                category: "提示工程",
-                description: "简洁有效的提示结构框架（背景-询问-收益）",
-                domains: ["business", "technical"],
-                taskTypes: ["prompt_engineering"],
-                keywords: ["background", "ask", "benefit", "simple", "effective"],
-                complexity: "simple",
-                examples: 2,
-                example: "数据分析：<br>背景：我需要分析销售数据<br>询问：请识别前三产品类别和趋势<br>收益：帮助制定下季度营销策略"
-            },
-            {
-                id: 6,
-                name: "六顶思考帽",
-                category: "决策制定",
-                description: "从六个不同角度全面探索决策的框架",
-                domains: ["business", "education"],
-                taskTypes: ["decision_making"],
-                keywords: ["facts", "feelings", "caution", "benefits", "creative", "process"],
-                complexity: "medium",
-                examples: 1,
-                example: "决策分析：<br>白帽（事实）：我们有3个月时间和5万元预算<br>红帽（情感）：团队对新功能感到兴奋<br>黑帽（谨慎）：技术风险较高<br>黄帽（利益）：可能提高用户留存20%<br>绿帽（创意）：可加入AI推荐功能<br>蓝帽（过程）：需分三个阶段实施"
-            },
-            {
-                id: 7,
-                name: "RELIC框架",
-                category: "内容创作",
-                description: "故事创作和内容生成的框架（角色-事件-地点-物品-创意）",
-                domains: ["creative", "education"],
-                taskTypes: ["content_creation"],
-                keywords: ["role", "event", "location", "item", "creativity", "story"],
-                complexity: "medium",
-                examples: 1,
-                example: "故事创作：<br>角色：退休侦探<br>事件：调查小镇神秘失踪案<br>地点：偏远山村<br>物品：旧日记和怀表<br>创意：失踪者其实在保护村庄秘密"
+<div class="notification" id="notification"></div>
+
+<script>
+const FRAMEWORKS = [
+    {
+        id: 1, name: "PEE框架", category: "技术分析",
+        description: "通过结构化论证构建分析性响应（论点 → 证据 → 解释）",
+        domains: ["technical","education"], taskTypes: ["analysis"],
+        keywords: ["分析","评估","数据","证据","论证","检查","评价"],
+        complexity: "simple", examples: 1,
+        samplePrompt: (desc) => `请使用 PEE 框架（论点-证据-解释）对以下内容进行结构化分析：
+
+任务背景：${desc}
+
+请按以下结构输出：
+
+【论点 Point】
+明确陈述核心主张或评估结论
+
+【证据 Evidence】
+列举支持论点的具体数据、事实或案例
+
+【解释 Explanation】
+说明证据如何支撑论点，并分析其深层含义与影响
+
+请确保三个部分逻辑紧密，形成完整的分析闭环。`
+    },
+    {
+        id: 2, name: "CRISPE框架", category: "提示工程",
+        description: "结构化 AI 交互的综合框架（能力-角色-身份-风格-目的-示例）",
+        domains: ["technical","creative"], taskTypes: ["prompt_engineering"],
+        keywords: ["提示词","AI","角色","优化","交互","指令"],
+        complexity: "medium", examples: 2,
+        samplePrompt: (desc) => `请使用 CRISPE 框架为以下需求生成一个高质量的 AI 提示词：
+
+需求描述：${desc}
+
+按照以下结构输出：
+
+【Capacity 能力】AI 需要具备的核心能力
+【Role 角色】AI 应扮演的专业角色
+【Identity 身份】详细的背景、经验和专业知识
+【Style 风格】期望的表达风格和语气
+【Purpose 目的】本次交互的具体目标
+【Examples 示例】理想输出的参考样本（如有）
+
+最终输出完整的提示词文本。`
+    },
+    {
+        id: 3, name: "RICE框架", category: "决策制定",
+        description: "基于量化评分进行优先级排序（覆盖范围-影响-信心-工作量）",
+        domains: ["business","technical"], taskTypes: ["decision_making"],
+        keywords: ["优先级","决策","排序","功能","评估","选择","规划"],
+        complexity: "medium", examples: 1,
+        samplePrompt: (desc) => `请使用 RICE 框架对以下决策场景进行量化评估：
+
+任务背景：${desc}
+
+对每个待选项，请分别评估：
+
+【Reach 覆盖范围】预计影响的用户数量（人/季度）
+【Impact 影响程度】对核心指标的影响（0.25=微弱 / 0.5=低 / 1=中 / 2=高 / 3=极高）
+【Confidence 信心度】对以上估计的把握程度（50% / 80% / 100%）
+【Effort 工作量】所需人力（人·月 或 人·周）
+
+RICE 得分 = (Reach × Impact × Confidence) ÷ Effort
+
+请输出每个选项的 RICE 得分和最终优先级排序，并给出选择理由。`
+    },
+    {
+        id: 4, name: "SCAMPER框架", category: "创意头脑风暴",
+        description: "通过 7 种创新技术激发创意（替换-结合-调整-修改-其他用途-消除-反转）",
+        domains: ["creative","business"], taskTypes: ["brainstorming"],
+        keywords: ["创新","创意","改进","想法","头脑风暴","设计","产品"],
+        complexity: "complex", examples: 1,
+        samplePrompt: (desc) => `请使用 SCAMPER 框架对以下主题进行全面的创意探索：
+
+主题/对象：${desc}
+
+请依次从 7 个维度展开思考，每个维度给出 2-3 个具体创意：
+
+【Substitute 替换】可以用什么替代现有元素？
+【Combine 结合】可以与哪些事物融合？
+【Adapt 调整】可以借鉴哪些领域的做法？
+【Modify/Magnify 修改/放大】可以强化或改变什么特性？
+【Put to other uses 其他用途】还能用在哪些场景？
+【Eliminate 消除】可以去掉哪些不必要的部分？
+【Reverse/Rearrange 反转/重组】颠倒或重新排列会产生什么？
+
+最后综合最有价值的创意，给出 Top 3 落地建议。`
+    },
+    {
+        id: 5, name: "BAB框架", category: "提示工程",
+        description: "简洁高效的提示结构（背景-询问-收益）",
+        domains: ["business","technical"], taskTypes: ["prompt_engineering"],
+        keywords: ["提示词","简单","优化","AI","指令","请求"],
+        complexity: "simple", examples: 2,
+        samplePrompt: (desc) => `请使用 BAB 框架为以下需求生成清晰有效的提示词：
+
+需求描述：${desc}
+
+按照以下结构组织提示词：
+
+【Background 背景】
+提供任务所需的关键上下文信息，帮助 AI 准确理解场景
+
+【Ask 询问】
+明确、具体地描述需要 AI 完成的任务，包含必要的约束条件
+
+【Benefit 收益】
+说明完成此任务的预期价值和用途，引导 AI 输出方向
+
+最终输出：一段完整、可直接使用的提示词。`
+    },
+    {
+        id: 6, name: "六顶思考帽", category: "决策制定",
+        description: "从六个维度全面探索复杂决策",
+        domains: ["business","education"], taskTypes: ["decision_making"],
+        keywords: ["决策","多角度","团队","分析","讨论","权衡","全面"],
+        complexity: "medium", examples: 1,
+        samplePrompt: (desc) => `请使用"六顶思考帽"框架对以下问题进行全方位分析：
+
+分析主题：${desc}
+
+请依次从六个视角给出见解：
+
+🎩 白帽【事实】现有的客观数据、信息和事实是什么？
+🎩 红帽【情感】直觉感受、情绪反应和非理性因素是什么？
+🎩 黑帽【谨慎】潜在风险、问题和需要警惕的是什么？
+🎩 黄帽【利益】积极面、机会和潜在价值是什么？
+🎩 绿帽【创意】有哪些创新方案、新思路和替代可能？
+🎩 蓝帽【过程】如何组织推进？下一步行动计划是什么？
+
+最后综合六帽视角，给出最终建议。`
+    },
+    {
+        id: 7, name: "RELIC框架", category: "内容创作",
+        description: "故事创作与内容生成框架（角色-事件-地点-物品-创意）",
+        domains: ["creative","education"], taskTypes: ["content_creation"],
+        keywords: ["写作","故事","创作","内容","文章","叙事","剧本"],
+        complexity: "medium", examples: 1,
+        samplePrompt: (desc) => `请使用 RELIC 框架为以下主题创作引人入胜的内容：
+
+创作需求：${desc}
+
+请先确定以下五个核心要素：
+
+【Role 角色】主要人物的背景、性格与动机
+【Event 事件】核心冲突或关键情节节点
+【Location 地点】场景设定与氛围营造
+【Item 物品】具有象征意义的关键道具
+【Creativity 创意】出人意料的转折或独特的叙事视角
+
+然后基于以上要素，创作完整内容。要求情节合理、细节生动、有情感共鸣。`
+    },
+    {
+        id: 8, name: "GRADE框架", category: "技术分析",
+        description: "专为评估与反馈设计的分析框架（目标-审阅-分析-诊断-评价）",
+        domains: ["education","technical"], taskTypes: ["analysis"],
+        keywords: ["批改","评估","反馈","评分","诊断","作业","测评","考核","评价"],
+        complexity: "medium", examples: 1,
+        samplePrompt: (desc) => `请使用 GRADE 框架对以下内容进行专业评估：
+
+评估背景：${desc}
+
+请按以下五个步骤输出完整评估报告：
+
+【Goal 目标】
+明确本次评估的目的和考察标准
+
+【Review 审阅】
+逐项梳理被评估内容，指出各部分的具体表现
+
+【Analyze 分析】
+深入分析问题所在，追溯每个问题的根本原因（概念理解？方法运用？细节疏忽？）
+
+【Diagnose 诊断】
+综合评估整体掌握水平（优秀 / 良好 / 待提升），指出核心短板
+
+【Evaluate 评价】
+给出综合评分（满分100）及 3 条具体、可操作的改进建议`
+    }
+];
+
+function buildSystemPrompt() {
+    const fwData = FRAMEWORKS.map(f => ({
+        id: f.id, name: f.name, category: f.category,
+        domains: f.domains, taskTypes: f.taskTypes,
+        keywords: f.keywords, complexity: f.complexity
+    }));
+    return [
+        "You are a prompt framework recommendation expert.",
+        "Analyze the user task description (in Chinese) and return ONLY a JSON object — no markdown, no code fences, no explanation.",
+        "Start your response with { and end with }.",
+        "",
+        "FRAMEWORKS: " + JSON.stringify(fwData),
+        "",
+        "SCORING: domain_match=30%, task_type=25%, keyword=20%, complexity=15%, examples_bonus=10%",
+        "",
+        'REQUIRED JSON (all numeric fields must be plain numbers, not strings):',
+        '{"detected":{"domains":["中文领域名，如教育/学习、商业/营销、技术/工程、创意/设计、决策制定、问题解决"],"taskType":"中文任务类型字符串","complexity":"简单 or 中等 or 复杂","keywords":["3-5个中文关键词"]},"topFramework":{"id":1,"score":85,"reasoning":"2-3句中文推荐理由","scoreBreakdown":{"domain":80,"task":100,"keyword":60,"complexity":100,"examples":10}},"alternatives":[{"id":2,"score":70,"reason":"一句中文"},{"id":3,"score":60,"reason":"一句中文"}]}',
+        "",
+        "Replace the example values with real analysis. alternatives must have exactly 2 items."
+    ].join("\n");
+}
+
+let lastAnalysis = null;
+let lastDesc = '';
+
+async function analyzeWithAI() {
+    const desc = document.getElementById('userDesc').value.trim();
+    if (!desc) {
+        showNotification('请先输入您的任务描述');
+        return;
+    }
+
+    const btn = document.getElementById('analyzeBtn');
+    const btnIcon = document.getElementById('btnIcon');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = true;
+    btnIcon.innerHTML = '<span class="spin"></span>';
+    btnText.textContent = 'AI 分析中...';
+
+    showSkeleton();
+
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 1200,
+                system: buildSystemPrompt(),
+                messages: [{ role: 'user', content: `分析需求并推荐框架：\n\n${desc}` }]
+            })
+        });
+
+        const data = await response.json();
+        console.log('[PromptX] API response:', JSON.stringify(data, null, 2));
+
+        // Handle API-level errors
+        if (!response.ok || data.type === 'error') {
+            const errMsg = data.error?.message || `API错误 HTTP ${response.status}`;
+            throw new Error(errMsg);
+        }
+
+        // Guard: content array missing
+        if (!Array.isArray(data.content) || data.content.length === 0) {
+            console.error('[PromptX] Unexpected response shape:', data);
+            throw new Error(`响应结构异常：缺少 content 字段（详见控制台）`);
+        }
+
+        const raw = data.content[0]?.text || '';
+        console.log('[PromptX] Raw text:', raw);
+
+        // Robust JSON extraction: try multiple strategies
+        let result = null;
+
+        // Strategy 1: direct parse after stripping markdown fences
+        try {
+            const clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+            result = JSON.parse(clean);
+        } catch(_) {}
+
+        // Strategy 2: extract first {...} block with regex
+        if (!result) {
+            const match = raw.match(/\{[\s\S]*\}/);
+            if (match) {
+                try { result = JSON.parse(match[0]); } catch(_) {}
             }
-        ];
-
-        // 领域选项
-        const domains = [
-            { id: "education", name: "教育/学习", description: "教学、学习、课程、评估" },
-            { id: "business", name: "商业/营销", description: "市场营销、销售、战略、管理" },
-            { id: "creative", name: "创意/设计", description: "头脑风暴、创新、设计、故事" },
-            { id: "technical", name: "技术/工程", description: "工程、开发、AI、数据" },
-            { id: "decision", name: "决策制定", description: "选择评估、判断、筛选" },
-            { id: "problem", name: "问题解决", description: "解决方案、挑战、故障排除" }
-        ];
-
-        // 初始化领域选择器
-        function initDomains() {
-            const container = document.getElementById('domainsContainer');
-            domains.forEach(domain => {
-                const div = document.createElement('div');
-                div.className = 'checkbox-item';
-                div.innerHTML = `
-                    <input type="checkbox" id="domain_${domain.id}" value="${domain.id}">
-                    <label for="domain_${domain.id}">
-                        <strong>${domain.name}</strong><br>
-                        <small style="color: #718096;">${domain.description}</small>
-                    </label>
-                `;
-                container.appendChild(div);
-            });
         }
 
-        // 显示通知
-        function showNotification(title, message, duration = 3000) {
-            const notification = document.getElementById('notification');
-            const notificationTitle = document.getElementById('notificationTitle');
-            const notificationMessage = document.getElementById('notificationMessage');
-
-            notificationTitle.textContent = title;
-            notificationMessage.textContent = message;
-            notification.classList.add('show');
-
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, duration);
+        if (!result) {
+            console.error('[PromptX] Could not parse JSON from:', raw);
+            throw new Error(`JSON 解析失败。原始响应：${raw.slice(0, 200)}`);
         }
 
-        // 计算领域匹配分数（Jaccard相似度）
-        function calculateDomainMatch(userDomains, frameworkDomains) {
-            if (userDomains.length === 0 || frameworkDomains.length === 0) return 0;
-
-            const intersection = userDomains.filter(domain =>
-                frameworkDomains.includes(domain)
-            ).length;
-
-            const union = new Set([...userDomains, ...frameworkDomains]).size;
-
-            return (intersection / union) * 100;
+        // Validate required fields
+        if (!result.topFramework?.id || !result.detected) {
+            throw new Error('AI 返回数据不完整，请重试');
         }
 
-        // 计算任务匹配分数
-        function calculateTaskMatch(userTaskType, frameworkTaskTypes) {
-            return frameworkTaskTypes.includes(userTaskType) ? 100 : 0;
+        lastAnalysis = result;
+        lastDesc = desc;
+        renderDetected(result.detected);
+        renderResults(result, desc);
+
+    } catch(err) {
+        console.error('[PromptX] Error:', err);
+        document.getElementById('resultsArea').innerHTML = `
+            <div class="empty-state">
+                <div class="icon">⚠️</div>
+                <p style="color:#e53e3e;margin-bottom:8px"><strong>分析失败</strong></p>
+                <pre style="color:#718096;font-size:0.78rem;white-space:pre-wrap;word-break:break-all;background:#f7fafc;padding:10px;border-radius:6px;max-height:160px;overflow-y:auto;text-align:left">${err.message || '请稍后重试'}</pre>
+            </div>`;
+    } finally {
+        btn.disabled = false;
+        btnIcon.textContent = '✨';
+        btnText.textContent = 'AI 智能分析并推荐框架';
+    }
+}
+
+function showSkeleton() {
+    document.getElementById('topScoreBadge').textContent = '分析中...';
+    document.getElementById('resultsArea').innerHTML = `
+        <div class="skeleton-wrap">
+            <div class="skeleton" style="height:200px"></div>
+            <div class="skeleton" style="height:120px"></div>
+            <div class="skeleton" style="height:160px"></div>
+            <div class="skeleton" style="height:90px"></div>
+        </div>`;
+}
+
+function renderDetected(detected) {
+    const section = document.getElementById('detectedSection');
+    section.style.display = 'block';
+
+    const render = (id, items) => {
+        const el = document.getElementById(id);
+        if (!items || (Array.isArray(items) && items.length === 0)) {
+            el.innerHTML = '<span class="det-tag empty">未识别</span>';
+        } else {
+            const arr = Array.isArray(items) ? items : [items];
+            el.innerHTML = arr.map(t => `<span class="det-tag">${t}</span>`).join('');
         }
+    };
 
-        // 计算关键词匹配分数
-        function calculateKeywordMatch(userKeywords, frameworkKeywords) {
-            if (userKeywords.length === 0) return 0;
+    render('detDomains', detected.domains);
+    render('detTaskType', detected.taskType);
+    render('detComplexity', detected.complexity);
+    render('detKeywords', detected.keywords);
+}
 
-            const matches = userKeywords.filter(keyword =>
-                frameworkKeywords.some(fwKeyword =>
-                    fwKeyword.toLowerCase().includes(keyword.toLowerCase()) ||
-                    keyword.toLowerCase().includes(fwKeyword.toLowerCase())
-                )
-            ).length;
+function renderResults(result, userDesc) {
+    const top = FRAMEWORKS.find(f => f.id === result.topFramework.id);
+    if (!top) return;
 
-            return Math.min(matches * 20, 100);
-        }
+    const score = result.topFramework.score;
+    const breakdown = result.topFramework.scoreBreakdown;
+    const samplePrompt = top.samplePrompt(userDesc);
 
-        // 计算复杂度匹配分数
-        function calculateComplexityMatch(userComplexity, frameworkComplexity) {
-            const levels = ['simple', 'medium', 'complex'];
-            const userIndex = levels.indexOf(userComplexity);
-            const frameworkIndex = levels.indexOf(frameworkComplexity);
+    document.getElementById('topScoreBadge').innerHTML = `
+        <span style="color:#667eea;font-weight:700">匹配度 ${score}/100</span>`;
 
-            if (userIndex === frameworkIndex) return 100;
-            if (Math.abs(userIndex - frameworkIndex) === 1) return 50;
-            return 0;
-        }
+    const altsHtml = (result.alternatives || []).map(alt => {
+        const fw = FRAMEWORKS.find(f => f.id === alt.id);
+        if (!fw) return '';
+        return `
+        <div class="alt-item" onclick="showAltPrompt(${alt.id}, '${escHtml(userDesc)}')">
+            <div class="alt-score-badge">${alt.score}</div>
+            <div class="alt-info">
+                <div class="alt-name">${fw.name}</div>
+                <span class="alt-cat">${fw.category}</span>
+                <div class="alt-reason">${alt.reason}</div>
+            </div>
+            <span style="color:#cbd5e0;font-size:1.1rem">›</span>
+        </div>`;
+    }).join('');
 
-        // 计算示例奖励分数
-        function calculateExamplesBonus(frameworkExamples) {
-            return frameworkExamples > 0 ? 10 : 0;
-        }
-
-        // 计算框架总分
-        function calculateFrameworkScore(userInput, framework) {
-            // 提取用户关键词
-            const keywordText = userInput.keywords.toLowerCase();
-            const descriptionText = userInput.description.toLowerCase();
-            const allText = keywordText + ' ' + descriptionText;
-
-            // 简单关键词提取（实际应用中需要更复杂的NLP处理）
-            const commonWords = ['的', '和', '在', '了', '是', '我', '有', '就', '都', '而', '及', '与', '或', '框架', '方法', '需要'];
-            const userKeywords = allText.split(/[\s,，、]+/)
-                .filter(word => word.length > 1 && !commonWords.includes(word))
-                .slice(0, 10); // 限制关键词数量
-
-            // 计算各项分数
-            const domainScore = calculateDomainMatch(userInput.domains, framework.domains);
-            const taskScore = calculateTaskMatch(userInput.taskType, framework.taskTypes);
-            const keywordScore = calculateKeywordMatch(userKeywords, framework.keywords);
-            const complexityScore = calculateComplexityMatch(userInput.complexity, framework.complexity);
-            const examplesBonus = calculateExamplesBonus(framework.examples);
-
-            // 加权总分
-            const totalScore = (
-                domainScore * 0.30 +
-                taskScore * 0.25 +
-                keywordScore * 0.20 +
-                complexityScore * 0.15 +
-                examplesBonus * 0.10
-            );
-
-            return {
-                total: Math.round(totalScore),
-                breakdown: {
-                    domain: Math.round(domainScore),
-                    task: Math.round(taskScore),
-                    keyword: Math.round(keywordScore),
-                    complexity: Math.round(complexityScore),
-                    examples: examplesBonus
-                }
-            };
-        }
-
-        // 获取用户输入
-        function getUserInput() {
-            const selectedDomains = [];
-            document.querySelectorAll('#domainsContainer input[type="checkbox"]:checked').forEach(checkbox => {
-                selectedDomains.push(checkbox.value);
-            });
-
-            return {
-                description: document.getElementById('description').value.trim(),
-                domains: selectedDomains,
-                taskType: document.getElementById('taskType').value,
-                keywords: document.getElementById('keywords').value.trim(),
-                complexity: document.getElementById('complexity').value
-            };
-        }
-
-        // 验证用户输入
-        function validateUserInput(input) {
-            if (!input.description) {
-                showNotification('输入错误', '请输入任务描述', 4000);
-                return false;
-            }
-
-            if (input.domains.length === 0) {
-                showNotification('输入错误', '请至少选择一个领域', 4000);
-                return false;
-            }
-
-            if (!input.taskType) {
-                showNotification('输入错误', '请选择任务类型', 4000);
-                return false;
-            }
-
-            return true;
-        }
-
-        // 显示加载状态
-        function showLoading() {
-            const container = document.getElementById('resultsContainer');
-            container.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>正在分析您的需求并计算框架匹配度...</p>
-                </div>
-            `;
-        }
-
-        // 显示推荐结果
-        function showResults(scoredFrameworks, userInput) {
-            const container = document.getElementById('resultsContainer');
-            const topScoreBadge = document.getElementById('topScoreBadge');
-            const recommendationInfo = document.getElementById('recommendationInfo');
-            const recommendationText = document.getElementById('recommendationText');
-
-            // 更新最高分徽章
-            const topScore = scoredFrameworks[0]?.score?.total || 0;
-            topScoreBadge.textContent = `最高分: ${topScore}`;
-
-            // 显示结果
-            if (scoredFrameworks.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <p>😕 未找到匹配的框架</p>
-                        <p>请尝试调整您的输入条件或联系系统管理员</p>
+    document.getElementById('resultsArea').innerHTML = `
+        <div class="result-wrap">
+            <!-- TOP RECOMMENDATION -->
+            <div class="top-rec">
+                <div class="top-rec-header">
+                    <div class="rec-title-block">
+                        <span class="rec-rank">🥇 首选推荐</span>
+                        <div class="rec-name">${top.name}</div>
+                        <span class="rec-category">${top.category}</span>
                     </div>
-                `;
-                return;
-            }
-
-            // 根据分数决定显示数量
-            let frameworksToShow = scoredFrameworks;
-            let displayText = "根据您的输入，系统已为您推荐最合适的框架。";
-
-            if (topScore > 80) {
-                frameworksToShow = scoredFrameworks.slice(0, 1);
-                displayText = "✅ 找到一个高度匹配的框架（分数>80）。";
-            } else if (topScore >= 60) {
-                frameworksToShow = scoredFrameworks.slice(0, 3);
-                displayText = "📊 找到多个合适的框架（分数60-80），建议您比较选择。";
-            } else {
-                displayText = "⚠️ 未找到高度匹配的框架（分数<60），建议您调整输入或联系专家。";
-            }
-
-            recommendationText.textContent = displayText;
-            recommendationInfo.style.display = 'block';
-
-            // 生成框架列表HTML
-            let html = '<div class="framework-list">';
-
-            frameworksToShow.forEach((item, index) => {
-                const framework = item.framework;
-                const score = item.score;
-
-                const isSelected = index === 0 && topScore > 60;
-
-                html += `
-                    <div class="framework-item ${isSelected ? 'selected' : ''}">
-                        <div class="framework-header">
-                            <div>
-                                <div class="framework-name">${framework.name}</div>
-                                <span class="framework-category">${framework.category}</span>
-                            </div>
-                            <div class="score-badge">${score.total}/100</div>
-                        </div>
-
-                        <p class="framework-description">${framework.description}</p>
-
-                        <div class="framework-details">
-                            <div class="detail-item">
-                                <span class="detail-label">领域匹配</span>
-                                <span class="detail-value">${score.breakdown.domain}%</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">任务匹配</span>
-                                <span class="detail-value">${score.breakdown.task}%</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">关键词匹配</span>
-                                <span class="detail-value">${score.breakdown.keyword}%</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">复杂度匹配</span>
-                                <span class="detail-value">${score.breakdown.complexity}%</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">示例奖励</span>
-                                <span class="detail-value">${score.breakdown.examples}/10</span>
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <span class="detail-label">适用领域</span>
-                            <div>
-                                ${framework.domains.map(domain => {
-                                    const domainInfo = domains.find(d => d.id === domain);
-                                    const isActive = userInput.domains.includes(domain);
-                                    return `<span class="domain-tag ${isActive ? 'active' : ''}">${domainInfo ? domainInfo.name : domain}</span>`;
-                                }).join('')}
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <span class="detail-label">任务类型</span>
-                            <div>
-                                ${framework.taskTypes.map(taskType => {
-                                    const taskNames = {
-                                        'prompt_engineering': '提示工程',
-                                        'decision_making': '决策制定',
-                                        'problem_solving': '问题解决',
-                                        'content_creation': '内容创作',
-                                        'analysis': '分析',
-                                        'brainstorming': '头脑风暴'
-                                    };
-                                    const isActive = userInput.taskType === taskType;
-                                    return `<span class="domain-tag ${isActive ? 'active' : ''}">${taskNames[taskType] || taskType}</span>`;
-                                }).join('')}
-                            </div>
-                        </div>
-
-                        ${framework.example ? `
-                            <div class="framework-example">
-                                <div class="example-title">📝 应用示例</div>
-                                ${framework.example}
-                            </div>
-                        ` : ''}
+                    <div class="score-circle">
+                        <span class="score-num">${score}</span>
+                        <span class="score-denom">/100</span>
                     </div>
-                `;
-            });
-
-            html += '</div>';
-            container.innerHTML = html;
-
-            // 显示通知
-            const matchCount = frameworksToShow.length;
-            const matchType = topScore > 80 ? '高度匹配' : topScore >= 60 ? '良好匹配' : '一般匹配';
-            showNotification('推荐完成', `找到${matchCount}个${matchType}的框架`, 4000);
-        }
-
-        // 处理表单提交
-        function handleFormSubmit(event) {
-            event.preventDefault();
-
-            const userInput = getUserInput();
-
-            if (!validateUserInput(userInput)) {
-                return;
-            }
-
-            // 显示加载状态
-            showLoading();
-
-            // 模拟计算延迟（实际应用中可能不需要）
-            setTimeout(() => {
-                // 为每个框架计算分数
-                const scoredFrameworks = frameworks.map(framework => {
-                    const score = calculateFrameworkScore(userInput, framework);
-                    return { framework, score };
-                });
-
-                // 按分数排序
-                scoredFrameworks.sort((a, b) => b.score.total - a.score.total);
-
-                // 显示结果
-                showResults(scoredFrameworks, userInput);
-            }, 800); // 800ms延迟模拟计算过程
-        }
-
-        // 重置表单
-        function resetForm() {
-            document.getElementById('frameworkForm').reset();
-            document.getElementById('resultsContainer').innerHTML = `
-                <div class="empty-state">
-                    <div class="spinner"></div>
-                    <p>等待输入...请填写左侧表单获取推荐</p>
                 </div>
-            `;
-            document.getElementById('topScoreBadge').textContent = '最高分: --';
-            document.getElementById('recommendationInfo').style.display = 'none';
 
-            showNotification('表单已重置', '所有输入已清空，可以重新开始', 3000);
-        }
+                <p class="rec-desc">${top.description}</p>
 
-        // 初始化页面
-        function initPage() {
-            // 初始化领域选择器
-            initDomains();
+                <!-- REASONING -->
+                <div class="reasoning-box">
+                    <div class="box-title">💡 推荐理由</div>
+                    <p>${result.topFramework.reasoning}</p>
+                </div>
 
-            // 设置表单提交事件
-            document.getElementById('frameworkForm').addEventListener('submit', handleFormSubmit);
+                <!-- SCORE BREAKDOWN -->
+                <div class="score-breakdown">
+                    <div class="box-title">📊 匹配分析</div>
+                    <div class="score-rows">
+                        ${scoreRow('领域匹配 (30%)', breakdown.domain, 100)}
+                        ${scoreRow('任务类型 (25%)', breakdown.task, 100)}
+                        ${scoreRow('关键词 (20%)', breakdown.keyword, 100)}
+                        ${scoreRow('复杂度 (15%)', breakdown.complexity, 100)}
+                        ${scoreRow('示例加分 (10%)', breakdown.examples, 10)}
+                    </div>
+                </div>
 
-            // 设置重置按钮事件
-            document.getElementById('resetBtn').addEventListener('click', resetForm);
+                <!-- SAMPLE PROMPT -->
+                <div class="prompt-box">
+                    <div class="prompt-box-header">
+                        <div class="box-title">📋 示范 Prompt（可直接使用）</div>
+                        <button class="btn-copy" onclick="copyPrompt(this)" data-text="${escAttr(samplePrompt)}">复制</button>
+                    </div>
+                    <div class="prompt-content">${escHtml(samplePrompt)}</div>
+                </div>
+            </div>
 
-            // 添加示例数据按钮（用于演示）
-            const formCard = document.querySelector('.card:first-child');
-            const demoBtn = document.createElement('button');
-            demoBtn.type = 'button';
-            demoBtn.className = 'btn btn-secondary';
-            demoBtn.textContent = '🚀 载入演示数据';
-            demoBtn.style.marginTop = '10px';
+            <!-- ALTERNATIVES -->
+            ${altsHtml ? `
+            <div class="alts-section">
+                <div class="alts-label">其他可选框架</div>
+                ${altsHtml}
+            </div>` : ''}
+        </div>`;
+}
 
-            demoBtn.addEventListener('click', () => {
-                document.getElementById('description').value = '我需要分析客户反馈数据，识别产品改进点，并制定下季度的产品开发计划。';
+function scoreRow(label, val, max) {
+    const pct = Math.round((val / max) * 100);
+    return `
+        <div class="score-row">
+            <span class="score-row-label">${label}</span>
+            <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%"></div></div>
+            <span class="score-row-val">${val}${max === 10 ? '' : '%'}</span>
+        </div>`;
+}
 
-                // 选中相关领域
-                document.querySelectorAll('#domainsContainer input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = ['business', 'technical'].includes(checkbox.value);
-                });
+function showAltPrompt(fwId, userDesc) {
+    const fw = FRAMEWORKS.find(f => f.id === fwId);
+    if (!fw || !lastAnalysis) return;
 
-                document.getElementById('taskType').value = 'analysis';
-                document.getElementById('keywords').value = '分析,客户,反馈,产品,改进,计划';
-                document.getElementById('complexity').value = 'medium';
+    // find alt score
+    const alt = lastAnalysis.alternatives?.find(a => a.id === fwId);
+    const score = alt?.score || '?';
 
-                showNotification('演示数据已载入', '点击"获取框架推荐"查看结果', 4000);
-            });
+    const samplePrompt = fw.samplePrompt(userDesc);
 
-            document.getElementById('frameworkForm').appendChild(demoBtn);
+    document.getElementById('resultsArea').innerHTML = `
+        <div class="result-wrap">
+            <div style="margin-bottom:12px">
+                <button onclick="renderResults(lastAnalysis, '${escAttr(userDesc)}')"
+                    style="background:none;border:none;color:#667eea;font-weight:600;cursor:pointer;font-size:0.88rem;">← 返回首选推荐</button>
+            </div>
+            <div class="top-rec" style="border-color:#a0aec0">
+                <div class="top-rec-header">
+                    <div class="rec-title-block">
+                        <span class="rec-rank" style="color:#a0aec0">备选框架</span>
+                        <div class="rec-name">${fw.name}</div>
+                        <span class="rec-category">${fw.category}</span>
+                    </div>
+                    <div class="score-circle" style="background:linear-gradient(135deg,#a0aec0,#718096)">
+                        <span class="score-num">${score}</span>
+                        <span class="score-denom">/100</span>
+                    </div>
+                </div>
+                <p class="rec-desc">${fw.description}</p>
+                <div class="prompt-box">
+                    <div class="prompt-box-header">
+                        <div class="box-title">📋 示范 Prompt</div>
+                        <button class="btn-copy" onclick="copyPrompt(this)" data-text="${escAttr(samplePrompt)}">复制</button>
+                    </div>
+                    <div class="prompt-content">${escHtml(samplePrompt)}</div>
+                </div>
+            </div>
+        </div>`;
+}
 
-            console.log('提示词框架选择器已初始化，包含7个示例框架');
-        }
+function copyPrompt(btn) {
+    const text = btn.getAttribute('data-text');
+    navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✅ 已复制';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    });
+}
 
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', initPage);
-    </script>
+const EXAMPLES = {
+    // 产品岗
+    product1: '我需要整理并分析本季度 APP 用户反馈（含评分、评论、客服工单），找出用户最集中的痛点，识别出需要优先优化的功能模块，并给出改进建议，用于下季度产品迭代规划。',
+    product2: '我要为滔搏 APP 的"积分兑换"功能撰写完整的需求文档，包括功能背景、用户故事、业务流程、交互逻辑、异常处理和验收标准，需求对象是开发和设计团队。',
+    // 开发岗
+    dev1: '我们计划重构会员系统的积分计算模块，涉及多个业务系统联动。我需要写一份技术方案，包括架构设计、接口定义、数据迁移策略和风险评估，供技术评审会使用。',
+    dev2: '线上支付接口近期出现间歇性超时报错，错误率约 2%，高峰期更严重。我需要系统梳理排查思路：从日志分析、链路追踪到第三方依赖，逐步定位根因并给出修复方案。',
+    // 运营岗
+    ops1: '滔搏即将迎来"618"大促，我需要制定一套覆盖线上 APP 和线下门店的联动促销方案，包括活动主题、优惠机制、会员专属权益、社媒传播节奏和效果衡量指标。',
+    ops2: '我需要分析华南区域 30 家门店过去三个月的销售数据，重点找出坪效低、客单价下滑的门店，分析原因（选品/陈列/人员/竞品），并提出针对性的运营改善建议。',
+    // 货品岗
+    merch1: '根据当前库存数据和销售预测，我需要制定下季度的补货策略：哪些 SKU 需要重点补货、安全库存水位如何设定、如何平衡库存成本与断货风险，以及给出门店分配建议。',
+    merch2: '本季度有一批运动鞋库龄超过 180 天，库存量较大，面临滞销风险。我需要分析滞销原因（定价/陈列/选品偏差/竞品冲击），并制定阶梯式清货方案，减少库存损耗。',
+    // 测试岗
+    qa1: '滔搏 APP 新上线"扫码购"功能，支持门店扫描商品条码后跳转线上下单。我需要编写完整的功能测试用例，覆盖正常流程、边界值、异常场景和兼容性，提供给测试团队执行。',
+    qa2: '本次版本迭代涉及购物车、结算、会员积分三个核心模块的改动，发布前需要做回归测试。我需要设计回归测试方案：确定测试范围、优先级排序、自动化覆盖策略和上线准入标准。',
+    // 总结报告
+    report1: '我们刚完成滔搏 APP 会员体系改版项目，需要撰写一份完整的项目复盘报告，内容包括：项目背景与目标、执行过程回顾、上线数据对比、问题与根因分析、经验沉淀与后续优化建议，面向管理层汇报。',
+    report2: '我需要生成一份本季度华南区域的业务汇报，内容涵盖：销售完成情况与达成率、重点门店表现、库存健康度、大促活动效果、存在的问题及下季度工作计划，格式简洁、数据优先、便于高管快速阅读。'
+};
+
+function fillExample(btn) {
+    const key = btn.getAttribute('data-key');
+    const text = key ? EXAMPLES[key] : btn.textContent;
+    document.getElementById('userDesc').value = text || '';
+    document.getElementById('userDesc').focus();
+    // scroll textarea to top
+    document.getElementById('userDesc').scrollTop = 0;
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(str) {
+    return String(str).replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/\n/g,'\\n');
+}
+
+function showNotification(msg) {
+    const n = document.getElementById('notification');
+    n.textContent = msg;
+    n.classList.add('show');
+    setTimeout(() => n.classList.remove('show'), 2500);
+}
+
+// enter key support
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.metaKey) analyzeWithAI();
+});
+</script>
 </body>
 </html>
